@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Scroll, ExternalLink } from 'lucide-react';
-import { SchemaEntry, loadBuiltinSchemas, parseUploadedSchema } from '@/lib/schema-store';
+import { SchemaEntry, loadBuiltinSchemas } from '@/lib/schema-store';
 import { SchemaCard } from '@/components/SchemaCard';
 import { SchemaViewer } from '@/components/SchemaViewer';
 import { Footer } from '@/components/Footer';
