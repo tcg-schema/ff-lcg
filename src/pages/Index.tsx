@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef } from 'react';
-import { Upload, Scroll, ExternalLink } from 'lucide-react';
-import { SchemaEntry, loadBuiltinSchemas, parseUploadedSchema } from '@/lib/schema-store';
+import { useState, useEffect } from 'react';
+import { Scroll, ExternalLink } from 'lucide-react';
+import { SchemaEntry, loadBuiltinSchemas } from '@/lib/schema-store';
 import { SchemaCard } from '@/components/SchemaCard';
 import { SchemaViewer } from '@/components/SchemaViewer';
 import { Footer } from '@/components/Footer';
@@ -9,7 +9,6 @@ const Index = () => {
   const [schemas, setSchemas] = useState<SchemaEntry[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     loadBuiltinSchemas().then((entries) => {
@@ -31,20 +30,6 @@ const Index = () => {
     URL.revokeObjectURL(url);
   };
 
-  const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      const content = reader.result as string;
-      const entry = parseUploadedSchema(file.name, content);
-      setSchemas(prev => [...prev, entry]);
-      setSelectedId(entry.id);
-    };
-    reader.readAsText(file);
-    e.target.value = '';
-  };
-
   return (
     <div className="min-h-screen flex flex-col">
       {/* Header */}
@@ -64,24 +49,10 @@ const Index = () => {
               href="https://tcg-schema.org"
               target="_blank"
               rel="noopener noreferrer"
-              className="hidden sm:flex items-center gap-1.5 text-xs text-muted-foreground hover:text-gold transition-colors"
+              className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-gold transition-colors"
             >
               tcg-schema.org <ExternalLink className="w-3 h-3" />
             </a>
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              className="flex items-center gap-2 px-3 py-2 text-xs font-medium rounded-md border border-gold-dim text-gold hover:bg-primary/10 transition-colors"
-            >
-              <Upload className="w-3.5 h-3.5" />
-              Add Schema
-            </button>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept=".ttl,.turtle"
-              onChange={handleUpload}
-              className="hidden"
-            />
           </div>
         </div>
       </header>
