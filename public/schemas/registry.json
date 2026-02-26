@@ -1,0 +1,20 @@
+[
+  {
+    "id": "lcg",
+    "name": "FFG LCG Module",
+    "file": "lcg.ttl",
+    "description": "Generic structures for Fantasy Flight Games Living Card Games"
+  },
+  {
+    "id": "marvel-champions",
+    "name": "Marvel Champions",
+    "file": "marvel-champions.ttl",
+    "description": "Marvel Champions: The Card Game module"
+  },
+  {
+    "id": "arkham",
+    "name": "Arkham Horror LCG",
+    "file": "arkham.ttl",
+    "description": "Arkham Horror: The Card Game module"
+  }
+]
