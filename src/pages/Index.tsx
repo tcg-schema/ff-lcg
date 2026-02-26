@@ -9,7 +9,6 @@ const Index = () => {
   const [schemas, setSchemas] = useState<SchemaEntry[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     loadBuiltinSchemas().then((entries) => {
@@ -29,20 +28,6 @@ const Index = () => {
     a.download = schema.fileName;
     a.click();
     URL.revokeObjectURL(url);
-  };
-
-  const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      const content = reader.result as string;
-      const entry = parseUploadedSchema(file.name, content);
-      setSchemas(prev => [...prev, entry]);
-      setSelectedId(entry.id);
-    };
-    reader.readAsText(file);
-    e.target.value = '';
   };
 
   return (
