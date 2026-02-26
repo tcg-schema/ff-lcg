@@ -1,0 +1,357 @@
+@prefix tcg:    <https://tcg-schema.org/core#> .
+@prefix lcg:    <https://tcg-schema.org/lcg#> .
+@prefix ah:     <https://tcg-schema.org/arkham#> .
+@prefix schema: <https://schema.org/> .
+@prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:    <http://www.w3.org/2001/XMLSchema#> .
+@prefix owl:    <http://www.w3.org/2002/07/owl#> .
+
+<https://tcg-schema.org/arkham>
+  a owl:Ontology ;
+  rdfs:label "TCG Schema — Arkham Horror LCG Module"@en ;
+  rdfs:comment "Arkham Horror: The Card Game modeled as an FFG LCG specialization on top of tcg-schema core (turn, pre-game, mulligan, end conditions, card types, chaos bag, skill tests, act/agenda scaffolding)."@en ;
+  owl:imports <https://tcg-schema.org/core> ;
+  owl:imports <https://tcg-schema.org/lcg> ;
+  owl:imports <https://schema.org/> .
+
+##########################
+# GAME INSTANCE
+##########################
+
+ah:ArkhamHorrorLCG a lcg:LCG ;
+  schema:name "Arkham Horror: The Card Game" ;
+  schema:identifier "arkham-horror-lcg" .
+
+##########################
+# CARD TYPES (CORE: tcg:CardType)
+##########################
+
+ah:CardTypes a schema:DefinedTermSet ; schema:name "Arkham Card Types" .
+
+ah:InvestigatorType a tcg:CardType ; schema:name "Investigator" ; schema:inDefinedTermSet ah:CardTypes .
+ah:AssetType        a tcg:CardType ; schema:name "Asset"        ; schema:inDefinedTermSet ah:CardTypes .
+ah:EventType        a tcg:CardType ; schema:name "Event"        ; schema:inDefinedTermSet ah:CardTypes .
+ah:SkillType        a tcg:CardType ; schema:name "Skill"        ; schema:inDefinedTermSet ah:CardTypes .
+
+ah:EnemyType        a tcg:CardType ; schema:name "Enemy"        ; schema:inDefinedTermSet ah:CardTypes .
+ah:TreacheryType    a tcg:CardType ; schema:name "Treachery"    ; schema:inDefinedTermSet ah:CardTypes .
+ah:LocationType     a tcg:CardType ; schema:name "Location"     ; schema:inDefinedTermSet ah:CardTypes .
+ah:ActType          a tcg:CardType ; schema:name "Act"          ; schema:inDefinedTermSet ah:CardTypes .
+ah:AgendaType       a tcg:CardType ; schema:name "Agenda"       ; schema:inDefinedTermSet ah:CardTypes .
+
+# Side assignment (FFG-LCG module)
+# Player cards: Investigator/Asset/Event/Skill
+# Encounter/Scenario cards: Enemy/Treachery/Location/Act/Agenda
+ah:defaultCardSide a rdf:Property ;
+  rdfs:label "defaultCardSide"@en ;
+  rdfs:comment "Optional convenience: default side inferred from cardType."@en ;
+  rdfs:domain tcg:CardType ;
+  rdfs:range lcg:CardSide .
+
+ah:InvestigatorType ah:defaultCardSide lcg:PlayerCard .
+ah:AssetType        ah:defaultCardSide lcg:PlayerCard .
+ah:EventType        ah:defaultCardSide lcg:PlayerCard .
+ah:SkillType        ah:defaultCardSide lcg:PlayerCard .
+
+ah:EnemyType        ah:defaultCardSide lcg:EncounterCard .
+ah:TreacheryType    ah:defaultCardSide lcg:EncounterCard .
+ah:LocationType     ah:defaultCardSide lcg:ScenarioCard .
+ah:ActType          ah:defaultCardSide lcg:ScenarioCard .
+ah:AgendaType       ah:defaultCardSide lcg:ScenarioCard .
+
+##########################
+# TRAITS (reuse tcg:CardSubtype; alias lcg:hasTrait already exists)
+##########################
+
+ah:Traits a schema:DefinedTermSet ; schema:name "Arkham Traits" .
+# Examples (not exhaustive)
+ah:WeaponTrait a tcg:CardSubtype ; schema:name "Weapon" ; schema:inDefinedTermSet ah:Traits .
+ah:SpellTrait  a tcg:CardSubtype ; schema:name "Spell"  ; schema:inDefinedTermSet ah:Traits .
+ah:AllyTrait   a tcg:CardSubtype ; schema:name "Ally"   ; schema:inDefinedTermSet ah:Traits .
+ah:ItemTrait   a tcg:CardSubtype ; schema:name "Item"   ; schema:inDefinedTermSet ah:Traits .
+
+##########################
+# RESOURCE SYSTEM: Resources (spend to play cards)
+##########################
+
+ah:ResourceSystem a tcg:ResourceSystem ;
+  schema:name "Resources" ;
+  tcg:inGame ah:ArkhamHorrorLCG .
+
+ah:Resource a tcg:ResourceType ;
+  schema:name "Resource" ;
+  tcg:inGame ah:ArkhamHorrorLCG .
+
+ah:ArkhamHorrorLCG tcg:hasResourceSystem ah:ResourceSystem .
+
+##########################
+# DEFAULT HAND SIZE + MULLIGAN (core)
+##########################
+
+ah:ArkhamHorrorLCG
+  tcg:defaultHandSize 5 ;
+  tcg:handSizeEnforcement [ a schema:DefinedTerm ; schema:name "discardDownToLimitEndOfRound" ] .
+
+# Arkham typically has no small fixed max hand like MTG; leave tcg:maxHandSize undefined (cards can set limits).
+# If you want a default, you can set tcg:maxHandSize 8 or omit.
+
+ah:ArkhamMulligan a tcg:MulliganRule ;
+  tcg:mulliganType [ a schema:DefinedTerm ; schema:name "partial" ] ;
+  tcg:allowsMultipleMulligans false ;
+  tcg:mulliganPenaltyModel [ a schema:DefinedTerm ; schema:name "none" ] ;
+  tcg:mulliganSummary "Draw 5 cards. You may discard any number of them, then draw that many cards once." .
+
+ah:ArkhamHorrorLCG tcg:hasMulliganRule ah:ArkhamMulligan .
+
+##########################
+# PRE-GAME STRUCTURE (core)
+##########################
+
+ah:PreGameSetup a tcg:PreGameStructure ;
+  schema:name "Arkham Scenario Setup" .
+
+ah:ArkhamHorrorLCG tcg:hasPreGameStructure ah:PreGameSetup .
+
+ah:PG0_ChooseScenario a tcg:PreGameStep ;
+  tcg:orderIndex 0 ;
+  tcg:stepKind [ a schema:DefinedTerm ; schema:name "chooseScenario" ] ;
+  tcg:stepSummary "Choose scenario and difficulty; gather required sets/modules." .
+
+ah:PG1_BuildEncounter a tcg:PreGameStep ;
+  tcg:orderIndex 1 ;
+  tcg:stepKind [ a schema:DefinedTerm ; schema:name "buildEncounterDeck" ] ;
+  tcg:stepSummary "Assemble encounter deck and set aside instructed cards." .
+
+ah:PG2_SetupLocations a tcg:PreGameStep ;
+  tcg:orderIndex 2 ;
+  tcg:stepKind [ a schema:DefinedTerm ; schema:name "setupLocationsAndInvestigators" ] ;
+  tcg:stepSummary "Put starting location(s) into play and place investigators." .
+
+ah:PG3_PrepareChaosBag a tcg:PreGameStep ;
+  tcg:orderIndex 3 ;
+  tcg:stepKind [ a schema:DefinedTerm ; schema:name "prepareChaosBag" ] ;
+  tcg:stepSummary "Prepare chaos bag for the scenario/difficulty." .
+
+ah:PG4_DrawOpeningHand a tcg:PreGameStep ;
+  tcg:orderIndex 4 ;
+  tcg:stepKind [ a schema:DefinedTerm ; schema:name "drawOpeningHand" ] ;
+  tcg:stepSummary "Each investigator draws 5 cards." ;
+  tcg:performedByRole [ a schema:DefinedTerm ; schema:name "eachPlayer" ] .
+
+ah:PG5_Mulligan a tcg:PreGameStep ;
+  tcg:orderIndex 5 ;
+  tcg:stepKind [ a schema:DefinedTerm ; schema:name "mulligan" ] ;
+  tcg:stepSummary "Each investigator may discard any number and redraw once." ;
+  tcg:repeatable false ;
+  tcg:performedByRole [ a schema:DefinedTerm ; schema:name "eachPlayer" ] .
+
+ah:PreGameSetup tcg:preGameStep
+  ah:PG0_ChooseScenario,
+  ah:PG1_BuildEncounter,
+  ah:PG2_SetupLocations,
+  ah:PG3_PrepareChaosBag,
+  ah:PG4_DrawOpeningHand,
+  ah:PG5_Mulligan .
+
+##########################
+# ROUND / TURN STRUCTURE (core)
+##########################
+
+ah:ArkhamRound a tcg:TurnStructure ;
+  schema:name "Arkham Round Structure" .
+
+ah:ArkhamHorrorLCG tcg:hasTurnStructure ah:ArkhamRound .
+
+ah:MythosPhase a tcg:TurnPhase ;
+  tcg:orderIndex 0 ;
+  tcg:partSummary "Place doom, advance agenda if needed, draw and resolve encounter cards." ;
+  tcg:priorityModel [ a schema:DefinedTerm ; schema:name "windowsOnly" ] .
+
+ah:InvestigationPhase a tcg:TurnPhase ;
+  tcg:orderIndex 1 ;
+  tcg:partSummary "Investigators take turns, each taking 3 actions, with reaction/fast windows." ;
+  tcg:priorityModel [ a schema:DefinedTerm ; schema:name "windowsOnly" ] .
+
+ah:EnemyPhase a tcg:TurnPhase ;
+  tcg:orderIndex 2 ;
+  tcg:partSummary "Enemies engage/move/attack according to rules; forced/reaction windows apply." ;
+  tcg:priorityModel [ a schema:DefinedTerm ; schema:name "windowsOnly" ] .
+
+ah:UpkeepPhase a tcg:TurnPhase ;
+  tcg:orderIndex 3 ;
+  tcg:partSummary "Ready cards, draw 1 card, gain 1 resource." ;
+  tcg:priorityModel [ a schema:DefinedTerm ; schema:name "windowsOnly" ] .
+
+ah:ArkhamRound tcg:turnPart
+  ah:MythosPhase,
+  ah:InvestigationPhase,
+  ah:EnemyPhase,
+  ah:UpkeepPhase .
+
+##########################
+# KEYWORDS (FFG timing windows + Arkham-specific mechanics)
+##########################
+
+ah:ArkhamKeywords a schema:DefinedTermSet ;
+  schema:name "Arkham Keyword Mechanics" .
+
+# Timing-ish keywords
+ah:Fast a tcg:Mechanic ;
+  schema:name "Fast" ;
+  schema:inDefinedTermSet ah:ArkhamKeywords ;
+  tcg:mechanicKind tcg:KeywordAbility ;
+  tcg:inGame ah:ArkhamHorrorLCG ;
+  lcg:playWindow lcg:FastWindow .
+
+ah:Forced a tcg:Mechanic ;
+  schema:name "Forced" ;
+  schema:inDefinedTermSet ah:ArkhamKeywords ;
+  tcg:mechanicKind tcg:KeywordAbility ;
+  tcg:inGame ah:ArkhamHorrorLCG ;
+  lcg:playWindow lcg:ForcedWindow .
+
+ah:Reaction a tcg:Mechanic ;
+  schema:name "Reaction" ;
+  schema:inDefinedTermSet ah:ArkhamKeywords ;
+  tcg:mechanicKind tcg:KeywordAbility ;
+  tcg:inGame ah:ArkhamHorrorLCG ;
+  lcg:playWindow lcg:ReactionWindow .
+
+ah:Interrupt a tcg:Mechanic ;
+  schema:name "Interrupt" ;
+  schema:inDefinedTermSet ah:ArkhamKeywords ;
+  tcg:mechanicKind tcg:KeywordAbility ;
+  tcg:inGame ah:ArkhamHorrorLCG ;
+  lcg:playWindow lcg:InterruptWindow .
+
+# Enemy behavior keywords (examples)
+ah:Hunter a tcg:Mechanic ;
+  schema:name "Hunter" ;
+  schema:inDefinedTermSet ah:ArkhamKeywords ;
+  tcg:mechanicKind tcg:KeywordAbility ;
+  tcg:inGame ah:ArkhamHorrorLCG .
+
+ah:Aloof a tcg:Mechanic ;
+  schema:name "Aloof" ;
+  schema:inDefinedTermSet ah:ArkhamKeywords ;
+  tcg:mechanicKind tcg:KeywordAbility ;
+  tcg:inGame ah:ArkhamHorrorLCG .
+
+ah:Retaliate a tcg:Mechanic ;
+  schema:name "Retaliate" ;
+  schema:inDefinedTermSet ah:ArkhamKeywords ;
+  tcg:mechanicKind tcg:KeywordAbility ;
+  tcg:inGame ah:ArkhamHorrorLCG .
+
+ah:Alert a tcg:Mechanic ;
+  schema:name "Alert" ;
+  schema:inDefinedTermSet ah:ArkhamKeywords ;
+  tcg:mechanicKind tcg:KeywordAbility ;
+  tcg:inGame ah:ArkhamHorrorLCG .
+
+##########################
+# ARKHAM-SPECIFIC CORE CONCEPTS: Clues, Doom, Damage/Horror
+##########################
+
+ah:Clue a schema:DefinedTerm ; schema:name "Clue" .
+ah:Doom a schema:DefinedTerm ; schema:name "Doom" .
+ah:Damage a schema:DefinedTerm ; schema:name "Damage" .
+ah:Horror a schema:DefinedTerm ; schema:name "Horror" .
+
+# Define effect types that are Arkham-specific (extend core effect type set)
+ah:DiscoverClues a tcg:EffectType ; schema:name "discoverClues" .
+ah:PlaceDoom a tcg:EffectType ; schema:name "placeDoom" .
+ah:RemoveDoom a tcg:EffectType ; schema:name "removeDoom" .
+ah:Evade a tcg:EffectType ; schema:name "evade" .
+ah:Engage a tcg:EffectType ; schema:name "engage" .
+ah:Parley a tcg:EffectType ; schema:name "parley" .
+ah:Move a tcg:EffectType ; schema:name "move" .
+
+##########################
+# CHAOS BAG + SKILL TESTS (Arkham-specific, minimal scaffolding)
+##########################
+
+ah:ChaosBag a rdfs:Class ;
+  rdfs:label "ChaosBag"@en ;
+  rdfs:comment "Container of chaos tokens used to resolve skill tests."@en ;
+  rdfs:subClassOf schema:Intangible .
+
+ah:ChaosToken a rdfs:Class ;
+  rdfs:label "ChaosToken"@en ;
+  rdfs:subClassOf schema:DefinedTerm .
+
+ah:hasChaosBag a rdf:Property ;
+  rdfs:label "hasChaosBag"@en ;
+  rdfs:domain lcg:Scenario ;
+  rdfs:range ah:ChaosBag .
+
+ah:chaosToken a rdf:Property ;
+  rdfs:label "chaosToken"@en ;
+  rdfs:domain ah:ChaosBag ;
+  rdfs:range ah:ChaosToken .
+
+ah:modifierValue a rdf:Property ;
+  rdfs:label "modifierValue"@en ;
+  rdfs:comment "Numeric modifier applied by a chaos token when it has a fixed value."@en ;
+  rdfs:domain ah:ChaosToken ;
+  rdfs:range xsd:integer .
+
+ah:tokenText a rdf:Property ;
+  rdfs:label "tokenText"@en ;
+  rdfs:comment "Rules text for special tokens (skull, cultist, tablet, elder thing, auto-fail, elder sign)."@en ;
+  rdfs:domain ah:ChaosToken ;
+  rdfs:range xsd:string .
+
+ah:SkillTest a rdfs:Class ;
+  rdfs:label "SkillTest"@en ;
+  rdfs:comment "A test comparing an investigator skill + modifiers against a difficulty value, resolved via a chaos token."@en ;
+  rdfs:subClassOf schema:Intangible .
+
+ah:skillType a rdf:Property ;
+  rdfs:label "skillType"@en ;
+  rdfs:domain ah:SkillTest ;
+  rdfs:range schema:DefinedTerm .
+
+ah:difficultyValue a rdf:Property ;
+  rdfs:label "difficultyValue"@en ;
+  rdfs:domain ah:SkillTest ;
+  rdfs:range xsd:integer .
+
+##########################
+# SCENARIO PROGRESS: ACT / AGENDA (minimal)
+##########################
+
+ah:ActDeck a rdfs:Class ;
+  rdfs:label "ActDeck"@en ;
+  rdfs:subClassOf schema:Intangible .
+
+ah:AgendaDeck a rdfs:Class ;
+  rdfs:label "AgendaDeck"@en ;
+  rdfs:subClassOf schema:Intangible .
+
+ah:scenarioHasActDeck a rdf:Property ;
+  rdfs:label "scenarioHasActDeck"@en ;
+  rdfs:domain lcg:Scenario ;
+  rdfs:range ah:ActDeck .
+
+ah:scenarioHasAgendaDeck a rdf:Property ;
+  rdfs:label "scenarioHasAgendaDeck"@en ;
+  rdfs:domain lcg:Scenario ;
+  rdfs:range ah:AgendaDeck .
+
+##########################
+# END CONDITIONS (core) — scenario-driven
+##########################
+
+ah:WinByResolution a tcg:WinCondition ;
+  tcg:conditionKind lcg:objectiveMet ;
+  tcg:checkTiming [ a schema:DefinedTerm ; schema:name "specialWindow" ] ;
+  tcg:conditionSummary "The scenario ends with a winning resolution when its objective is met (typically by advancing the Act deck to a resolution)." .
+
+ah:LoseByAgenda a tcg:LoseCondition ;
+  tcg:conditionKind lcg:failStateReached ;
+  tcg:checkTiming [ a schema:DefinedTerm ; schema:name "specialWindow" ] ;
+  tcg:conditionSummary "The scenario ends (often badly) when the Agenda deck advances to a failing resolution or a fail state is reached." .
+
+ah:ArkhamHorrorLCG tcg:hasEndCondition ah:WinByResolution, ah:LoseByAgenda .

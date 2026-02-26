@@ -1,0 +1,318 @@
+@prefix tcg:    <https://tcg-schema.org/core#> .
+@prefix lcg:    <https://tcg-schema.org/lcg#> .
+@prefix mc:     <https://tcg-schema.org/marvel-champions#> .
+@prefix schema: <https://schema.org/> .
+@prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:    <http://www.w3.org/2001/XMLSchema#> .
+@prefix owl:    <http://www.w3.org/2002/07/owl#> .
+
+<https://tcg-schema.org/marvel-champions>
+  a owl:Ontology ;
+  rdfs:label "TCG Schema — Marvel Champions Module"@en ;
+  rdfs:comment "Marvel Champions modeled as an FFG LCG specialization on top of tcg-schema core (phases, pre-game, mulligan, end conditions, card types, villain/scheme scaffolding, threat/hp primitives)."@en ;
+  owl:imports <https://tcg-schema.org/core> ;
+  owl:imports <https://tcg-schema.org/lcg> ;
+  owl:imports <https://schema.org/> .
+
+##########################
+# GAME INSTANCE
+##########################
+
+mc:MarvelChampions a lcg:LCG ;
+  schema:name "Marvel Champions: The Card Game" ;
+  schema:identifier "marvel-champions" .
+
+##########################
+# CARD TYPES
+##########################
+
+mc:CardTypes a schema:DefinedTermSet ; schema:name "Marvel Champions Card Types" .
+
+# Player-side
+mc:IdentityType   a tcg:CardType ; schema:name "Identity"   ; schema:inDefinedTermSet mc:CardTypes .
+mc:HeroType       a tcg:CardType ; schema:name "Hero"       ; schema:inDefinedTermSet mc:CardTypes .
+mc:AlterEgoType   a tcg:CardType ; schema:name "Alter-Ego"  ; schema:inDefinedTermSet mc:CardTypes .
+mc:AllyType       a tcg:CardType ; schema:name "Ally"       ; schema:inDefinedTermSet mc:CardTypes .
+mc:SupportType    a tcg:CardType ; schema:name "Support"    ; schema:inDefinedTermSet mc:CardTypes .
+mc:UpgradeType    a tcg:CardType ; schema:name "Upgrade"    ; schema:inDefinedTermSet mc:CardTypes .
+mc:EventType      a tcg:CardType ; schema:name "Event"      ; schema:inDefinedTermSet mc:CardTypes .
+mc:ResourceType   a tcg:CardType ; schema:name "Resource"   ; schema:inDefinedTermSet mc:CardTypes .
+
+# Encounter / scenario-side
+mc:VillainType     a tcg:CardType ; schema:name "Villain"      ; schema:inDefinedTermSet mc:CardTypes .
+mc:MainSchemeType  a tcg:CardType ; schema:name "Main Scheme"  ; schema:inDefinedTermSet mc:CardTypes .
+mc:SideSchemeType  a tcg:CardType ; schema:name "Side Scheme"  ; schema:inDefinedTermSet mc:CardTypes .
+mc:MinionType      a tcg:CardType ; schema:name "Minion"       ; schema:inDefinedTermSet mc:CardTypes .
+mc:TreacheryType   a tcg:CardType ; schema:name "Treachery"    ; schema:inDefinedTermSet mc:CardTypes .
+mc:AttachmentType  a tcg:CardType ; schema:name "Attachment"   ; schema:inDefinedTermSet mc:CardTypes .
+mc:EnvironmentType a tcg:CardType ; schema:name "Environment"  ; schema:inDefinedTermSet mc:CardTypes .
+mc:ObligationType  a tcg:CardType ; schema:name "Obligation"   ; schema:inDefinedTermSet mc:CardTypes .
+
+##########################
+# CARD SIDE MAPPING (FFG-LCG)
+##########################
+
+mc:defaultCardSide a rdf:Property ;
+  rdfs:label "defaultCardSide"@en ;
+  rdfs:comment "Optional convenience: default side inferred from cardType."@en ;
+  rdfs:domain tcg:CardType ;
+  rdfs:range lcg:CardSide .
+
+mc:IdentityType  mc:defaultCardSide lcg:PlayerCard .
+mc:HeroType      mc:defaultCardSide lcg:PlayerCard .
+mc:AlterEgoType  mc:defaultCardSide lcg:PlayerCard .
+mc:AllyType      mc:defaultCardSide lcg:PlayerCard .
+mc:SupportType   mc:defaultCardSide lcg:PlayerCard .
+mc:UpgradeType   mc:defaultCardSide lcg:PlayerCard .
+mc:EventType     mc:defaultCardSide lcg:PlayerCard .
+mc:ResourceType  mc:defaultCardSide lcg:PlayerCard .
+
+mc:VillainType     mc:defaultCardSide lcg:ScenarioCard .
+mc:MainSchemeType  mc:defaultCardSide lcg:ScenarioCard .
+mc:SideSchemeType  mc:defaultCardSide lcg:EncounterCard .
+mc:MinionType      mc:defaultCardSide lcg:EncounterCard .
+mc:TreacheryType   mc:defaultCardSide lcg:EncounterCard .
+mc:AttachmentType  mc:defaultCardSide lcg:EncounterCard .
+mc:EnvironmentType mc:defaultCardSide lcg:EncounterCard .
+mc:ObligationType  mc:defaultCardSide lcg:EncounterCard .
+
+##########################
+# ASPECTS (deckbuilding identity)
+##########################
+
+mc:Aspects a schema:DefinedTermSet ; schema:name "Marvel Champions Aspects" .
+mc:Aggression a schema:DefinedTerm ; schema:name "Aggression" ; schema:inDefinedTermSet mc:Aspects .
+mc:Justice    a schema:DefinedTerm ; schema:name "Justice"    ; schema:inDefinedTermSet mc:Aspects .
+mc:Leadership a schema:DefinedTerm ; schema:name "Leadership" ; schema:inDefinedTermSet mc:Aspects .
+mc:Protection a schema:DefinedTerm ; schema:name "Protection" ; schema:inDefinedTermSet mc:Aspects .
+mc:Basic      a schema:DefinedTerm ; schema:name "Basic"      ; schema:inDefinedTermSet mc:Aspects .
+
+mc:cardAspect a rdf:Property ;
+  rdfs:label "cardAspect"@en ;
+  rdfs:comment "Aspect affiliation (Aggression/Justice/Leadership/Protection/Basic)."@en ;
+  rdfs:domain tcg:Card ;
+  rdfs:range schema:DefinedTerm .
+
+##########################
+# RESOURCES (pay to play)
+##########################
+
+mc:ResourceSystem a tcg:ResourceSystem ;
+  schema:name "Resources" ;
+  tcg:inGame mc:MarvelChampions .
+
+# In Marvel Champions, resources have types (Physical/Energy/Mental/Wild).
+mc:ResourceKinds a schema:DefinedTermSet ; schema:name "Marvel Champions Resource Kinds" .
+mc:Physical a schema:DefinedTerm ; schema:name "Physical" ; schema:inDefinedTermSet mc:ResourceKinds .
+mc:Energy   a schema:DefinedTerm ; schema:name "Energy"   ; schema:inDefinedTermSet mc:ResourceKinds .
+mc:Mental   a schema:DefinedTerm ; schema:name "Mental"   ; schema:inDefinedTermSet mc:ResourceKinds .
+mc:Wild     a schema:DefinedTerm ; schema:name "Wild"     ; schema:inDefinedTermSet mc:ResourceKinds .
+
+mc:resourceKind a rdf:Property ;
+  rdfs:label "resourceKind"@en ;
+  rdfs:comment "Resource icon(s) provided by a resource card or printed resource box."@en ;
+  rdfs:domain tcg:Card ;
+  rdfs:range schema:DefinedTerm .
+
+mc:MarvelChampions tcg:hasResourceSystem mc:ResourceSystem .
+
+##########################
+# DEFAULT HAND + MULLIGAN
+##########################
+
+# Hand size depends on identity form (Hero vs Alter-Ego) -> we model defaults + per-face override.
+mc:MarvelChampions tcg:handSizeEnforcement [ a schema:DefinedTerm ; schema:name "discardDownToLimitEndOfRound" ] .
+
+mc:heroHandSize a rdf:Property ;
+  rdfs:label "heroHandSize"@en ;
+  rdfs:comment "Hand size when in hero form (identity-specific)."@en ;
+  rdfs:domain tcg:Card ;  # Identity/Hero
+  rdfs:range xsd:integer .
+
+mc:alterEgoHandSize a rdf:Property ;
+  rdfs:label "alterEgoHandSize"@en ;
+  rdfs:comment "Hand size when in alter-ego form (identity-specific)."@en ;
+  rdfs:domain tcg:Card ;  # Identity/Alter-Ego
+  rdfs:range xsd:integer .
+
+mc:MarvelMulligan a tcg:MulliganRule ;
+  tcg:mulliganType [ a schema:DefinedTerm ; schema:name "partial" ] ;
+  tcg:allowsMultipleMulligans false ;
+  tcg:mulliganPenaltyModel [ a schema:DefinedTerm ; schema:name "none" ] ;
+  tcg:mulliganSummary "Draw your starting hand. You may discard any number of cards, then draw that many once." .
+
+mc:MarvelChampions tcg:hasMulliganRule mc:MarvelMulligan .
+
+##########################
+# PRE-GAME STRUCTURE
+##########################
+
+mc:PreGameSetup a tcg:PreGameStructure ;
+  schema:name "Marvel Champions Scenario Setup" .
+
+mc:MarvelChampions tcg:hasPreGameStructure mc:PreGameSetup .
+
+mc:PG0_SelectHeroAndScenario a tcg:PreGameStep ;
+  tcg:orderIndex 0 ;
+  tcg:stepKind [ a schema:DefinedTerm ; schema:name "chooseIdentityAndScenario" ] ;
+  tcg:stepSummary "Choose identity/hero decks and a villain scenario (difficulty/modular sets)." .
+
+mc:PG1_BuildEncounterDeck a tcg:PreGameStep ;
+  tcg:orderIndex 1 ;
+  tcg:stepKind [ a schema:DefinedTerm ; schema:name "buildEncounterDeck" ] ;
+  tcg:stepSummary "Assemble encounter deck: villain set + main scheme + modular encounter sets." .
+
+mc:PG2_SetInitialState a tcg:PreGameStep ;
+  tcg:orderIndex 2 ;
+  tcg:stepKind [ a schema:DefinedTerm ; schema:name "setupInitialState" ] ;
+  tcg:stepSummary "Set villain stage 1, main scheme stage 1, place starting threat, set villain HP, set players in alter-ego." .
+
+mc:PG3_DrawOpeningHand a tcg:PreGameStep ;
+  tcg:orderIndex 3 ;
+  tcg:stepKind [ a schema:DefinedTerm ; schema:name "drawOpeningHand" ] ;
+  tcg:stepSummary "Each player draws starting hand (identity-specific size)." .
+
+mc:PG4_Mulligan a tcg:PreGameStep ;
+  tcg:orderIndex 4 ;
+  tcg:stepKind [ a schema:DefinedTerm ; schema:name "mulligan" ] ;
+  tcg:stepSummary "Each player may discard any number and redraw once." ;
+  tcg:repeatable false .
+
+mc:PreGameSetup tcg:preGameStep
+  mc:PG0_SelectHeroAndScenario,
+  mc:PG1_BuildEncounterDeck,
+  mc:PG2_SetInitialState,
+  mc:PG3_DrawOpeningHand,
+  mc:PG4_Mulligan .
+
+##########################
+# ROUND STRUCTURE (Player Phase / Villain Phase)
+##########################
+
+mc:MarvelRound a tcg:TurnStructure ;
+  schema:name "Marvel Champions Round Structure" .
+
+mc:MarvelChampions tcg:hasTurnStructure mc:MarvelRound .
+
+mc:PlayerPhase a tcg:TurnPhase ;
+  tcg:orderIndex 0 ;
+  tcg:partSummary "Each player takes a turn: actions, play cards, use abilities, thwart/attack, etc." ;
+  tcg:priorityModel [ a schema:DefinedTerm ; schema:name "windowsOnly" ] .
+
+mc:VillainPhase a tcg:TurnPhase ;
+  tcg:orderIndex 1 ;
+  tcg:partSummary "Villain activates, schemes/attacks, then each player is dealt an encounter card and resolves it." ;
+  tcg:priorityModel [ a schema:DefinedTerm ; schema:name "windowsOnly" ] .
+
+mc:MarvelRound tcg:turnPart mc:PlayerPhase, mc:VillainPhase .
+
+##########################
+# KEYWORDS (timing + villain/minion behavior)
+##########################
+
+mc:Keywords a schema:DefinedTermSet ; schema:name "Marvel Champions Keywords" .
+
+# Common timing / triggers (FFG-style)
+mc:Forced a tcg:Mechanic ;
+  schema:name "Forced" ;
+  schema:inDefinedTermSet mc:Keywords ;
+  tcg:mechanicKind tcg:KeywordAbility ;
+  tcg:inGame mc:MarvelChampions ;
+  lcg:playWindow lcg:ForcedWindow .
+
+mc:Response a tcg:Mechanic ;
+  schema:name "Response" ;
+  schema:inDefinedTermSet mc:Keywords ;
+  tcg:mechanicKind tcg:KeywordAbility ;
+  tcg:inGame mc:MarvelChampions ;
+  lcg:playWindow lcg:ReactionWindow .
+
+mc:Interrupt a tcg:Mechanic ;
+  schema:name "Interrupt" ;
+  schema:inDefinedTermSet mc:Keywords ;
+  tcg:mechanicKind tcg:KeywordAbility ;
+  tcg:inGame mc:MarvelChampions ;
+  lcg:playWindow lcg:InterruptWindow .
+
+# Encounter/Villain-ish keywords (examples, not exhaustive)
+mc:Guard a tcg:Mechanic ; schema:name "Guard" ; schema:inDefinedTermSet mc:Keywords ; tcg:mechanicKind tcg:KeywordAbility ; tcg:inGame mc:MarvelChampions .
+mc:Tough a tcg:Mechanic ; schema:name "Tough" ; schema:inDefinedTermSet mc:Keywords ; tcg:mechanicKind tcg:KeywordAbility ; tcg:inGame mc:MarvelChampions .
+mc:Piercing a tcg:Mechanic ; schema:name "Piercing" ; schema:inDefinedTermSet mc:Keywords ; tcg:mechanicKind tcg:KeywordAbility ; tcg:inGame mc:MarvelChampions .
+mc:Overkill a tcg:Mechanic ; schema:name "Overkill" ; schema:inDefinedTermSet mc:Keywords ; tcg:mechanicKind tcg:KeywordAbility ; tcg:inGame mc:MarvelChampions .
+
+##########################
+# THREAT / HP PRIMITIVES + EFFECT TYPES
+##########################
+
+mc:Threat a schema:DefinedTerm ; schema:name "Threat" .
+mc:HitPoints a schema:DefinedTerm ; schema:name "HitPoints" .
+
+mc:PlaceThreat a tcg:EffectType ; schema:name "placeThreat" .
+mc:RemoveThreat a tcg:EffectType ; schema:name "removeThreat" .
+mc:DealDamage a tcg:EffectType ; schema:name "dealDamage" .
+mc:HealDamage a tcg:EffectType ; schema:name "healDamage" .
+mc:Stun a tcg:EffectType ; schema:name "stun" .
+mc:Confuse a tcg:EffectType ; schema:name "confuse" .
+mc:ReadyExhaust a tcg:EffectType ; schema:name "readyOrExhaust" .
+
+##########################
+# VILLAIN + SCHEME SCAFFOLDING (scenario objects)
+##########################
+
+mc:VillainScenario a rdfs:Class ;
+  rdfs:label "VillainScenario"@en ;
+  rdfs:comment "A scenario defined by a villain (multi-stage) and a main scheme (multi-stage), plus modular encounter sets."@en ;
+  rdfs:subClassOf lcg:Scenario .
+
+mc:VillainStage a rdfs:Class ;
+  rdfs:label "VillainStage"@en ;
+  rdfs:comment "A stage of a villain (I/II/III) with its own stats and abilities."@en ;
+  rdfs:subClassOf schema:Intangible .
+
+mc:SchemeStage a rdfs:Class ;
+  rdfs:label "SchemeStage"@en ;
+  rdfs:comment "A stage of the main scheme (1A/1B etc.) with threat threshold and effects."@en ;
+  rdfs:subClassOf schema:Intangible .
+
+mc:scenarioHasVillainStage a rdf:Property ;
+  rdfs:label "scenarioHasVillainStage"@en ;
+  rdfs:domain mc:VillainScenario ;
+  rdfs:range mc:VillainStage .
+
+mc:scenarioHasSchemeStage a rdf:Property ;
+  rdfs:label "scenarioHasSchemeStage"@en ;
+  rdfs:domain mc:VillainScenario ;
+  rdfs:range mc:SchemeStage .
+
+mc:stageNumber a rdf:Property ;
+  rdfs:label "stageNumber"@en ;
+  rdfs:domain schema:Intangible ;
+  rdfs:range xsd:integer .
+
+mc:threatThreshold a rdf:Property ;
+  rdfs:label "threatThreshold"@en ;
+  rdfs:domain mc:SchemeStage ;
+  rdfs:range xsd:integer .
+
+mc:baseHitPoints a rdf:Property ;
+  rdfs:label "baseHitPoints"@en ;
+  rdfs:comment "Base HP (often scaled by players; scaling can be modeled separately)."@en ;
+  rdfs:domain mc:VillainStage ;
+  rdfs:range xsd:integer .
+
+##########################
+# END CONDITIONS (core)
+##########################
+
+mc:WinByDefeatingVillain a tcg:WinCondition ;
+  tcg:conditionKind [ a schema:DefinedTerm ; schema:name "villainDefeated" ] ;
+  tcg:checkTiming [ a schema:DefinedTerm ; schema:name "specialWindow" ] ;
+  tcg:conditionSummary "Players win when the villain's final stage is defeated." .
+
+mc:LoseByMainScheme a tcg:LoseCondition ;
+  tcg:conditionKind [ a schema:DefinedTerm ; schema:name "mainSchemeCompletes" ] ;
+  tcg:checkTiming [ a schema:DefinedTerm ; schema:name "specialWindow" ] ;
+  tcg:conditionSummary "Players lose when the main scheme advances/completes its losing condition (typically reaching or exceeding its threat threshold and resolving)." .
+
+mc:MarvelChampions tcg:hasEndCondition mc:WinByDefeatingVillain, mc:LoseByMainScheme .
