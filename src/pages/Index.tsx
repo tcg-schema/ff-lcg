@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
-import { Upload, Scroll, ExternalLink } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Scroll, ExternalLink } from 'lucide-react';
 import { SchemaEntry, loadBuiltinSchemas, parseUploadedSchema } from '@/lib/schema-store';
 import { SchemaCard } from '@/components/SchemaCard';
 import { SchemaViewer } from '@/components/SchemaViewer';
