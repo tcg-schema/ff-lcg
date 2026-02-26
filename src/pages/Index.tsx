@@ -49,24 +49,10 @@ const Index = () => {
               href="https://tcg-schema.org"
               target="_blank"
               rel="noopener noreferrer"
-              className="hidden sm:flex items-center gap-1.5 text-xs text-muted-foreground hover:text-gold transition-colors"
+              className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-gold transition-colors"
             >
               tcg-schema.org <ExternalLink className="w-3 h-3" />
             </a>
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              className="flex items-center gap-2 px-3 py-2 text-xs font-medium rounded-md border border-gold-dim text-gold hover:bg-primary/10 transition-colors"
-            >
-              <Upload className="w-3.5 h-3.5" />
-              Add Schema
-            </button>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept=".ttl,.turtle"
-              onChange={handleUpload}
-              className="hidden"
-            />
           </div>
         </div>
       </header>
