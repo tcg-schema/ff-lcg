@@ -1,0 +1,174 @@
+@prefix tcg:    <https://tcg-schema.org/core#> .
+@prefix lcg:    <https://tcg-schema.org/lcg#> .
+@prefix schema: <https://schema.org/> .
+@prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:   <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:    <http://www.w3.org/2001/XMLSchema#> .
+@prefix owl:    <http://www.w3.org/2002/07/owl#> .
+
+<https://tcg-schema.org/lcg>
+  a owl:Ontology ;
+  rdfs:label "TCG Schema — FFG LCG Module"@en ;
+  rdfs:comment "Generic structures for Fantasy Flight Games Living Card Games (player vs encounter/scenario, modular sets, action windows, campaign/scenario scaffolding)."@en ;
+  owl:imports <https://tcg-schema.org/core> ;
+  owl:imports <https://schema.org/> .
+
+############################
+# HIGH-LEVEL STRUCTURE
+############################
+
+lcg:LCG a rdfs:Class ;
+  rdfs:label "Living Card Game"@en ;
+  rdfs:subClassOf tcg:CardGame .
+
+# Many FFG LCGs are scenario-based (Arkham, LotR), some are match-based (Marvel Champions is scenario-based too).
+lcg:Scenario a rdfs:Class ;
+  rdfs:label "Scenario"@en ;
+  rdfs:comment "A playable scenario/mission with setup, objectives, and resolution conditions."@en ;
+  rdfs:subClassOf schema:CreativeWork .
+
+lcg:Campaign a rdfs:Class ;
+  rdfs:label "Campaign"@en ;
+  rdfs:comment "A sequence of scenarios connected by persistent state (log, upgrades, outcomes)."@en ;
+  rdfs:subClassOf schema:CreativeWork .
+
+lcg:hasScenario a rdf:Property ;
+  rdfs:label "hasScenario"@en ;
+  rdfs:domain tcg:CardGame ;
+  rdfs:range lcg:Scenario .
+
+lcg:hasCampaign a rdf:Property ;
+  rdfs:label "hasCampaign"@en ;
+  rdfs:domain tcg:CardGame ;
+  rdfs:range lcg:Campaign .
+
+lcg:campaignScenario a rdf:Property ;
+  rdfs:label "campaignScenario"@en ;
+  rdfs:comment "Scenarios included in a campaign (order can be expressed via tcg:orderIndex on an intermediate node if needed)."@en ;
+  rdfs:domain lcg:Campaign ;
+  rdfs:range lcg:Scenario .
+
+############################
+# DECKS: PLAYER VS ENCOUNTER
+############################
+
+lcg:DeckRole a rdfs:Class ;
+  rdfs:label "DeckRole"@en ;
+  rdfs:subClassOf schema:DefinedTerm .
+
+lcg:PlayerDeckRole a lcg:DeckRole ; schema:name "playerDeck" .
+lcg:EncounterDeckRole a lcg:DeckRole ; schema:name "encounterDeck" .
+lcg:ScenarioDeckRole a lcg:DeckRole ; schema:name "scenarioDeck" .
+lcg:VillainDeckRole a lcg:DeckRole ; schema:name "villainDeck" .
+
+lcg:deckRole a rdf:Property ;
+  rdfs:label "deckRole"@en ;
+  rdfs:domain tcg:Deck ;
+  rdfs:range lcg:DeckRole .
+
+lcg:scenarioUsesDeck a rdf:Property ;
+  rdfs:label "scenarioUsesDeck"@en ;
+  rdfs:domain lcg:Scenario ;
+  rdfs:range tcg:Deck .
+
+############################
+# CARD SIDE / OWNERSHIP ROLE
+############################
+
+lcg:CardSide a rdfs:Class ;
+  rdfs:label "CardSide"@en ;
+  rdfs:comment "Which side a card belongs to: player cards vs encounter/scenario cards."@en ;
+  rdfs:subClassOf schema:DefinedTerm .
+
+lcg:PlayerCard a lcg:CardSide ; schema:name "player" .
+lcg:EncounterCard a lcg:CardSide ; schema:name "encounter" .
+lcg:ScenarioCard a lcg:CardSide ; schema:name "scenario" .
+
+lcg:cardSide a rdf:Property ;
+  rdfs:label "cardSide"@en ;
+  rdfs:domain tcg:Card ;
+  rdfs:range lcg:CardSide .
+
+############################
+# MODULAR SETS (very FFG)
+############################
+
+lcg:ModuleSet a rdfs:Class ;
+  rdfs:label "ModuleSet"@en ;
+  rdfs:comment "A modular set of cards used in setup (encounter sets, scenario sets, villain packs, etc.)."@en ;
+  rdfs:subClassOf schema:CreativeWork .
+
+lcg:moduleKind a rdf:Property ;
+  rdfs:label "moduleKind"@en ;
+  rdfs:domain lcg:ModuleSet ;
+  rdfs:range schema:DefinedTerm .
+
+lcg:scenarioUsesModule a rdf:Property ;
+  rdfs:label "scenarioUsesModule"@en ;
+  rdfs:domain lcg:Scenario ;
+  rdfs:range lcg:ModuleSet .
+
+lcg:moduleContainsPrinting a rdf:Property ;
+  rdfs:label "moduleContainsPrinting"@en ;
+  rdfs:domain lcg:ModuleSet ;
+  rdfs:range tcg:CardPrinting .
+
+############################
+# UNIQUE + TRAITS (subtypes)
+############################
+
+lcg:isUnique a rdf:Property ;
+  rdfs:label "isUnique"@en ;
+  rdfs:comment "Whether the card is unique (unique rule handled by the game)."@en ;
+  rdfs:domain tcg:Card ;
+  rdfs:range xsd:boolean .
+
+# Reuse core: tcg:cardSubtype for traits. Add an alias for clarity.
+lcg:hasTrait a rdf:Property ;
+  rdfs:label "hasTrait"@en ;
+  rdfs:comment "FFG-style trait (usually printed in italics). Alias of tcg:cardSubtype."@en ;
+  rdfs:domain tcg:Card ;
+  rdfs:range tcg:CardSubtype .
+
+############################
+# ACTION WINDOWS / TIMING
+############################
+
+lcg:TimingWindow a rdfs:Class ;
+  rdfs:label "TimingWindow"@en ;
+  rdfs:comment "A named timing window for playing actions and triggering abilities (Action, Reaction, Interrupt, Forced, Fast, etc.)."@en ;
+  rdfs:subClassOf schema:DefinedTerm .
+
+lcg:timingWindows a schema:DefinedTermSet ;
+  schema:name "FFG LCG Timing Windows" .
+
+lcg:ActionWindow a lcg:TimingWindow ; schema:name "Action" ; schema:inDefinedTermSet lcg:timingWindows .
+lcg:FastWindow a lcg:TimingWindow ; schema:name "Fast" ; schema:inDefinedTermSet lcg:timingWindows .
+lcg:ReactionWindow a lcg:TimingWindow ; schema:name "Reaction" ; schema:inDefinedTermSet lcg:timingWindows .
+lcg:InterruptWindow a lcg:TimingWindow ; schema:name "Interrupt" ; schema:inDefinedTermSet lcg:timingWindows .
+lcg:ForcedWindow a lcg:TimingWindow ; schema:name "Forced" ; schema:inDefinedTermSet lcg:timingWindows .
+
+lcg:playWindow a rdf:Property ;
+  rdfs:label "playWindow"@en ;
+  rdfs:comment "In which timing window a card/ability can be played/triggered."@en ;
+  rdfs:domain schema:Thing ;   # tcg:Card or tcg:Ability
+  rdfs:range lcg:TimingWindow .
+
+############################
+# END CONDITIONS: scenario-driven
+############################
+
+lcg:ScenarioEndCondition a rdfs:Class ;
+  rdfs:label "ScenarioEndCondition"@en ;
+  rdfs:comment "End conditions tied to scenario structures (objective met, agenda reached, villain defeated, threat maxed, etc.)."@en ;
+  rdfs:subClassOf tcg:EndCondition .
+
+lcg:objectiveMet a schema:DefinedTerm ; schema:name "objectiveMet" .
+lcg:failStateReached a schema:DefinedTerm ; schema:name "failStateReached" .
+lcg:resign a schema:DefinedTerm ; schema:name "resign" .
+lcg:timeExpired a schema:DefinedTerm ; schema:name "timeExpired" .
+
+lcg:scenarioHasEndCondition a rdf:Property ;
+  rdfs:label "scenarioHasEndCondition"@en ;
+  rdfs:domain lcg:Scenario ;
+  rdfs:range tcg:EndCondition .
